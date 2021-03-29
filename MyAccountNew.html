@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+    <body>
+
+        <h1>My Account</h1>
+
+        <button onClick=viewLive()>Some button</button>
+        <br/>
+        <br/>
+        <button onClick=viewArchive()>Another button</button>
+
+        <script>
+
+            function auth(token) {
+                if (isEmpty(token)) {
+                    alert("Not Authenticated");
+                }
+                else {
+                    alert("Authenticated!");
+                }
+            }
+
+            function isEmpty(str) {
+                return (!str || str.length === 0 );
+            }
+
+            function requestAuth() {
+                console.log("Auth initiated...waiting on client to call auth with token");
+                var platform = getPlatform();
+                if (platform == "win") {
+                    return window.chrome.webview.hostObjects.sync.bridge.Auth();
+                }
+                else if (platform == "ios") {
+                    window.webkit.messageHandlers.Auth.postMessage();
+                }
+                else if (platform == "android") {
+                    return AndroidBridge.Auth();
+                }
+            }
+
+            window.onload = requestAuth();
+
+            function getPlatform() {
+                var urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get('platform');
+            }
+
+           
+        </script>
+
+    </body>
+
+</html>
