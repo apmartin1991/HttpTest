@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 
@@ -5,30 +6,39 @@
 
         <h1>Cams Test</h1>
 
+        Server ID: <input type="text" id="txtServer" style="width: 300px;" value="055dd549-075d-44dd-ab91-6c98c3f2cccb"/>
+        <br/>
+        <br/>
+        Encoder ID: <input type="text" id="txtEncoder" style="width: 300px;" value="fe880e14-6da0-4cd8-bbc8-92e240747c27"/>
+        <br/>
+        <br/>
+        Archive Timestamp: <input type="text" id="txtTimestamp" value="1616678602000"/> <button onClick=resetTimestamp()>Now</button>
+        <br/>
+        <br/>
         <button onClick=viewLive()>View Live</button>
         <br/>
         <br/>
         <button onClick=viewArchive()>View Archive</button>
+        <br/>
+        <br/>
+        Debug Output:
+        <br/>
+        <textarea id="txtOutput" readonly="true" style="width: 100%; height: 300px;"></textarea>
 
         <script>
 
             function auth(token) {
-                if (token == "1234") {
-                    alert("Authenticated");
-                }
-                else {
-                    alert("Not authenticated!");
-                }
+                writeLine(`auth() called with token: ${token}`);
             }
 
             function requestAuth() {
-                console.log("Auth initiated...waiting on client to call auth with token");
-                var platform = getPlatform();
+                writeLine("Auth initiated...waiting on client to call auth with token");
+                const platform = getPlatform();
                 if (platform == "win") {
                     return window.chrome.webview.hostObjects.sync.bridge.Auth();
                 }
                 else if (platform == "ios") {
-                    window.webkit.messageHandlers.Auth.postMessage();
+                    window.webkit.messageHandlers.Auth.postMessage("");
                 }
                 else if (platform == "android") {
                     return AndroidBridge.Auth();
@@ -37,15 +47,31 @@
 
             window.onload = requestAuth();
 
+            function getServerId() {
+                return document.getElementById("txtServer").value;
+            }
+
+            function getEncoderId() {
+                return document.getElementById("txtEncoder").value;
+            }
+
+            function getTimestamp() {
+                return document.getElementById("txtTimestamp").value;
+            }
+
+            function resetTimestamp() {
+                document.getElementById("txtTimestamp").value = Date.now();
+            }
+
             function getPlatform() {
-                var urlParams = new URLSearchParams(window.location.search);
+                const urlParams = new URLSearchParams(window.location.search);
                 return urlParams.get('platform');
             }
 
             function viewLive() {
-                console.log("View Live");
-                var platform = getPlatform();
-                var payload = "s=055dd549-075d-44dd-ab91-6c98c3f2cccb&e=fe880e14-6da0-4cd8-bbc8-92e240747c27";
+                const platform = getPlatform();
+                const payload = `s=${getServerId()}&e=${getEncoderId()}`;
+                writeLine(`viewLive() called with payload: ${payload}`);
                 if (platform == "win") {
                     return window.chrome.webview.hostObjects.sync.bridge.ViewLive(payload);
                 }
@@ -58,19 +84,25 @@
             }
 
             function viewArchive() {
-                console.log("View Archive");
-                var urlParams = new URLSearchParams(window.location.search);
-                var platform = urlParams.get('platform');
-                var payload = "s=055dd549-075d-44dd-ab91-6c98c3f2cccb&e=fe880e14-6da0-4cd8-bbc8-92e240747c27&t=1616678602000";
+                const urlParams = new URLSearchParams(window.location.search);
+                const platform = urlParams.get('platform');
+                const payload = `s=${getServerId()}&e=${getEncoderId()}&t=${getTimestamp()}`;
+                writeLine(`viewArchive() called with payload: ${payload}`);
                 if (platform == "win") {
                     return window.chrome.webview.hostObjects.sync.bridge.ViewArchive(payload);
                 }
                 else if (platform == "ios") {
-                    window.webkit.messageHandlers.ViewLive.postMessage(payload);
+                    window.webkit.messageHandlers.ViewArchive.postMessage(payload);
                 }
                 else if (platform == "android") {
                     return AndroidBridge.ViewArchive(payload);
                 }
+            }
+
+            function writeLine(output) {
+                const element = document.getElementById('txtOutput')
+                const date = new Date();
+                element.value += `${date.toLocaleTimeString()}: ${output}\n`
             }
         </script>
 
