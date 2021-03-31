@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html>
 
@@ -6,9 +7,6 @@
 
         <h1>Cams Test</h1>
 
-        Server ID: <input type="text" id="txtServer" style="width: 300px;" value="055dd549-075d-44dd-ab91-6c98c3f2cccb"/>
-        <br/>
-        <br/>
         Encoder ID: <input type="text" id="txtEncoder" style="width: 300px;" value="fe880e14-6da0-4cd8-bbc8-92e240747c27"/>
         <br/>
         <br/>
@@ -47,10 +45,6 @@
 
             window.onload = requestAuth();
 
-            function getServerId() {
-                return document.getElementById("txtServer").value;
-            }
-
             function getEncoderId() {
                 return document.getElementById("txtEncoder").value;
             }
@@ -70,7 +64,7 @@
 
             function viewLive() {
                 const platform = getPlatform();
-                const payload = `s=${getServerId()}&e=${getEncoderId()}`;
+                const payload = `e=${getEncoderId()}`;
                 writeLine(`viewLive() called with payload: ${payload}`);
                 if (platform == "win") {
                     return window.chrome.webview.hostObjects.sync.bridge.ViewLive(payload);
@@ -86,7 +80,7 @@
             function viewArchive() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const platform = urlParams.get('platform');
-                const payload = `s=${getServerId()}&e=${getEncoderId()}&t=${getTimestamp()}`;
+                const payload = `e=${getEncoderId()}&t=${getTimestamp()}`;
                 writeLine(`viewArchive() called with payload: ${payload}`);
                 if (platform == "win") {
                     return window.chrome.webview.hostObjects.sync.bridge.ViewArchive(payload);
